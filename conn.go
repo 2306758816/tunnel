@@ -4,6 +4,10 @@ import (
 	"encoding/binary"
 	"fmt"
 	"net"
+	"sync"
+	"sync/atomic"
+
+	"github.com/willf/bitset"
 
 	"github.com/ccsexyz/utils"
 )
@@ -63,10 +67,12 @@ type FecConn struct {
 	*config
 	fecDecoder *fecDecoder
 	fecEncoder *fecEncoder
+	checker    *packetIDChecker
+	pktid      uint64
 	recovers   [][]byte
 }
 
-func (c *FecConn) Read(b []byte) (n int, err error) {
+func (c *FecConn) doRead(b []byte) (n int, err error) {
 	for n == 0 {
 		for len(c.recovers) != 0 {
 			r := c.recovers[0]
@@ -98,12 +104,34 @@ func (c *FecConn) Read(b []byte) (n int, err error) {
 	return
 }
 
+func (c *FecConn) Read(b []byte) (n int, err error) {
+	for {
+		var nr int
+		nr, err = c.doRead(b)
+		if err != nil {
+			return
+		}
+		if nr < 8 {
+			continue
+		}
+		pktid := binary.BigEndian.Uint64(b[len(b)-8:])
+		if c.checker.test(pktid) == false {
+			continue
+		}
+		n = nr - 8
+		return
+	}
+}
+
 func (c *FecConn) Write(b []byte) (n int, err error) {
-	ext := b[:fecHeaderSizePlus2+len(b)]
-	copy(ext[fecHeaderSizePlus2:], b)
+	blen := len(b)
+	ext := b[:fecHeaderSizePlus2+blen+8]
+	copy(ext[fecHeaderSizePlus2:fecHeaderSizePlus2+blen], b)
+	pktid := atomic.AddUint64(&c.pktid, 1)
+	binary.BigEndian.PutUint64(ext[fecHeaderSizePlus2+blen:], pktid)
 	ecc := c.fecEncoder.encode(ext)
 
-	n, err = c.Conn.Write(ext)
+	_, err = c.Conn.Write(ext)
 	if err != nil {
 		return
 	}
@@ -115,5 +143,55 @@ func (c *FecConn) Write(b []byte) (n int, err error) {
 		}
 	}
 
+	n = blen
 	return
+}
+
+const maxConv = 4096
+
+type packetIDChecker struct {
+	currHead  uint64
+	oldIdsSet *bitset.BitSet
+	curIdsSet *bitset.BitSet
+	lock      sync.Mutex
+}
+
+func newPacketIDChecker() *packetIDChecker {
+	p := new(packetIDChecker)
+	p.oldIdsSet = bitset.New(maxConv)
+	p.curIdsSet = bitset.New(maxConv)
+	return p
+}
+
+func (p *packetIDChecker) testWithLock(id uint64) bool {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	return p.test(id)
+}
+
+func (p *packetIDChecker) test(id uint64) bool {
+	if id > p.currHead+2*maxConv || id+maxConv < p.currHead {
+		return false
+	}
+	if id < p.currHead {
+		off := uint(id + maxConv - p.currHead)
+		if p.oldIdsSet.Test(off) {
+			return false
+		}
+		p.oldIdsSet.Set(off)
+		return true
+	}
+	if id >= p.currHead && id < p.currHead+maxConv {
+		off := uint(id - p.currHead)
+		if p.curIdsSet.Test(off) {
+			return false
+		}
+		p.curIdsSet.Set(off)
+		return true
+	}
+	o := p.oldIdsSet.ClearAll()
+	p.oldIdsSet = p.curIdsSet
+	p.curIdsSet = o
+	p.currHead += maxConv
+	return p.test(id)
 }

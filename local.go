@@ -40,6 +40,7 @@ func RunLocalServer(c *config) {
 				config:     c,
 				fecEncoder: newFECEncoder(c.DataShard, c.ParityShard, 0),
 				fecDecoder: newFECDecoder(3*(c.DataShard+c.ParityShard), c.DataShard, c.ParityShard),
+				checker:    newPacketIDChecker(),
 			}
 		}
 		return
