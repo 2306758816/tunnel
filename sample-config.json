@@ -9,7 +9,8 @@
         "parityshard": 2,
         "password": "123",
         "password": "aes-256-cfb",
-        "mtu": 1200
+        "mtu": 1200,
+        "udp": false
     },
     {
         "type": "server",
@@ -20,6 +21,7 @@
         "parityshard": 2,
         "password": "123",
         "password": "aes-256-cfb",
-        "mtu": 1200
+        "mtu": 1200,
+        "udp": false
     }
 ]

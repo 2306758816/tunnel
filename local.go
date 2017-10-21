@@ -19,6 +19,10 @@ func RunLocalServer(c *config) {
 		IgnRST: true,
 		Dummy:  c.Dummy,
 	}
+	ctx := &utils.UDPServerCtx{
+		Mtu:     c.Mtu,
+		Expires: c.Expires,
+	}
 	conn, err := utils.NewUDPListener(c.Localaddr)
 	if err != nil {
 		log.Fatal(err)
@@ -43,8 +47,8 @@ func RunLocalServer(c *config) {
 				checker:    newPacketIDChecker(),
 			}
 		}
+		log.Println("create tunnel from", conn.RemoteAddr(), "->", conn.LocalAddr(), "to", rconn.LocalAddr(), "->", rconn.RemoteAddr())
 		return
 	}
-	ctx := &utils.UDPServerCtx{Expires: c.Expires, Mtu: c.Mtu}
 	ctx.RunUDPServer(conn, create)
 }

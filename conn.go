@@ -15,10 +15,15 @@ import (
 type Conn struct {
 	net.Conn
 	*config
+	rbuf []byte
+	wbuf []byte
 }
 
 func (c *Conn) Read(b []byte) (n int, err error) {
-	b2 := make([]byte, c.Mtu)
+	if c.rbuf == nil {
+		c.rbuf = make([]byte, c.Mtu)
+	}
+	b2 := c.rbuf
 	for {
 		n, err = c.Conn.Read(b2)
 		if err != nil {
@@ -51,7 +56,10 @@ func (c *Conn) Write(b []byte) (n int, err error) {
 	if err != nil {
 		return
 	}
-	b2 := make([]byte, c.Mtu)
+	if c.wbuf == nil {
+		c.wbuf = make([]byte, c.Mtu)
+	}
+	b2 := c.wbuf
 	copy(b2, enc.GetIV())
 	enc.Encrypt(b2[c.Ivlen:], b)
 	_, err = c.Conn.Write(b2[:n2])
@@ -70,6 +78,7 @@ type FecConn struct {
 	checker    *packetIDChecker
 	pktid      uint64
 	recovers   [][]byte
+	rbuf       []byte
 }
 
 func (c *FecConn) doRead(b []byte) (n int, err error) {
@@ -87,13 +96,16 @@ func (c *FecConn) doRead(b []byte) (n int, err error) {
 			n = copy(b, r[2:sz])
 			return
 		}
-		buf := make([]byte, c.Mtu)
+		if c.rbuf == nil {
+			c.rbuf = make([]byte, c.Mtu)
+		}
+		buf := c.rbuf
 		var num int
 		num, err = c.Conn.Read(buf)
 		if err != nil {
 			return
 		}
-		f := c.fecDecoder.decodeBytes(buf)
+		f := c.fecDecoder.decodeBytes(buf[:num])
 		if f.flag == typeData {
 			n = copy(b, buf[fecHeaderSizePlus2:num])
 		}
@@ -114,7 +126,7 @@ func (c *FecConn) Read(b []byte) (n int, err error) {
 		if nr < 8 {
 			continue
 		}
-		pktid := binary.BigEndian.Uint64(b[len(b)-8:])
+		pktid := binary.BigEndian.Uint64(b[nr-8:])
 		if c.checker.test(pktid) == false {
 			continue
 		}

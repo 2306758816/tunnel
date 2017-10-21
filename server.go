@@ -38,6 +38,9 @@ func RunRemoteServer(c *config) {
 			}
 		}
 		rconn, err = net.Dial("udp", c.Remoteaddr)
+		if err == nil {
+			log.Println("create tunnel from", conn.RemoteAddr(), "->", conn.LocalAddr(), "to", rconn.LocalAddr(), "->", rconn.RemoteAddr())
+		}
 		return
 	}
 	ctx := &utils.UDPServerCtx{Expires: c.Expires, Mtu: c.Mtu}
