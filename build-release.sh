@@ -1,20 +1,29 @@
 #!/bin/bash
 unamestr=`uname`
 SHA256='shasum -a 256'
+if ! hash shasum 2> /dev/null
+then 
+	SHA256='sha256sum.exe'
+fi
 
 VERSION=`date -u +%Y%m%d`
 LDFLAGS="-X main.VERSION=$VERSION -s -w"
 GCFLAGS=""
 
-OSES=(linux darwin)
+OSES=(linux darwin windows)
 ARCHS=(amd64 386)
 for os in ${OSES[@]}; do
 	for arch in ${ARCHS[@]}; do
 		suffix=""
+		if [ "$os" == "windows" ]
+		then
+			suffix=".exe"
+		fi
         cgo_enabled=0
-        if [ $os == "darwin" ]; then
+        if [ "$os" == "windows" ]
+        then 
             cgo_enabled=1
-        fi
+        fi 
         env CGO_ENABLED=$cgo_enabled GOOS=$os GOARCH=$arch go build -ldflags "$LDFLAGS" -gcflags "$GCFLAGS" -o tunnel_${os}_${arch}${suffix} github.com/ccsexyz/tunnel
 		env CGO_ENABLED=$cgo_enabled GOOS=$os GOARCH=$arch go build -ldflags "$LDFLAGS" -gcflags "$GCFLAGS" -tags goprof -o tunnel_${os}_${arch}${suffix}_pprof github.com/ccsexyz/tunnel
 		tar -zcf tunnel-${os}-${arch}-$VERSION.tar.gz tunnel_${os}_${arch}${suffix} tunnel_${os}_${arch}${suffix}_pprof
