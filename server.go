@@ -17,7 +17,7 @@ func RunRemoteServer(c *config) {
 		DSCP:   0,
 		IgnRST: true,
 		Mixed:  true,
-		Dummy:  c.Dummy,
+		Dummy:  !c.NoDummy,
 	}
 	conn, err := kcpraw.ListenRAW(c.Localaddr, c.Password, c.UseMul, c.UDP, &raw)
 	if err != nil {
@@ -29,13 +29,7 @@ func RunRemoteServer(c *config) {
 			config: c,
 		}
 		if c.DataShard != 0 && c.ParityShard != 0 {
-			conn = &FecConn{
-				Conn:       conn,
-				config:     c,
-				fecEncoder: newFECEncoder(c.DataShard, c.ParityShard, 0),
-				fecDecoder: newFECDecoder(3*(c.DataShard+c.ParityShard), c.DataShard, c.ParityShard),
-				checker:    newPacketIDChecker(),
-			}
+			conn = utils.NewFecConn(conn, c.DataShard, c.ParityShard)
 		}
 		rconn, err = net.Dial("udp", c.Remoteaddr)
 		if err == nil {

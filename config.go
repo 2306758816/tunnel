@@ -27,7 +27,7 @@ type config struct {
 	Password    string `json:"password"`
 	Mtu         int    `json:"mtu"`
 	UDP         bool   `json:"udp"`
-	Dummy       bool   `json:"dummy"`
+	NoDummy     bool   `json:"nodummy"`
 	UseMul      bool   `json:"usemul"`
 	MulConn     int    `json:"mulconn"`
 	Ivlen       int

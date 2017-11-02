@@ -17,7 +17,7 @@ func RunLocalServer(c *config) {
 		Host:   c.Host,
 		DSCP:   0,
 		IgnRST: true,
-		Dummy:  c.Dummy,
+		Dummy:  !c.NoDummy,
 	}
 	ctx := &utils.UDPServerCtx{
 		Mtu:     c.Mtu,
@@ -35,17 +35,11 @@ func RunLocalServer(c *config) {
 			return
 		}
 		rconn = &Conn{
-			Conn:   rconn,
+			Conn:   &utils.CopyConn{Conn: rconn},
 			config: c,
 		}
 		if c.DataShard != 0 && c.ParityShard != 0 {
-			rconn = &FecConn{
-				Conn:       rconn,
-				config:     c,
-				fecEncoder: newFECEncoder(c.DataShard, c.ParityShard, 0),
-				fecDecoder: newFECDecoder(3*(c.DataShard+c.ParityShard), c.DataShard, c.ParityShard),
-				checker:    newPacketIDChecker(),
-			}
+			rconn = utils.NewFecConn(rconn, c.DataShard, c.ParityShard)
 		}
 		log.Println("create tunnel from", conn.RemoteAddr(), "->", conn.LocalAddr(), "to", rconn.LocalAddr(), "->", rconn.RemoteAddr())
 		return

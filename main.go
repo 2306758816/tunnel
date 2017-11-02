@@ -30,7 +30,7 @@ func main() {
 	flag.IntVar(&cmdconfig.Mtu, "mtu", 1400, "set maximum transmission unit")
 	flag.StringVar(&pprof, "pprof", "", "the listen address of pprof http server")
 	flag.StringVar(&configfile, "c", "", "the path of config file")
-	flag.BoolVar(&cmdconfig.Dummy, "dummy", false, "enable dummy socket")
+	flag.BoolVar(&cmdconfig.NoDummy, "nodummy", false, "disable dummy socket")
 	flag.BoolVar(&cmdconfig.UseMul, "usemul", false, "use multi-conn mode")
 	flag.IntVar(&cmdconfig.MulConn, "mulconn", 0, "set the number of mulconn")
 	flag.Parse()

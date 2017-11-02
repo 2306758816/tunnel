@@ -58,39 +58,39 @@ Usage
 $ ./tunnel -h
 Usage of ./tunnel:
   -c string
-        the path of config file
+    	the path of config file
   -ds int
-        set fec - datashard
-  -dummy
-        enable dummy socket
+    	set fec - datashard
   -expires int
-        expiration time (default 60)
+    	expiration time (default 60)
   -host string
-        set the host of obfs (default "www.bing.com")
+    	set the host of obfs (default "www.bing.com")
   -l string
-        set local listen address
+    	set local listen address
   -method string
-        the method of encryption(chacha20, aes-*, rc4-md5, salsa20, none) (default "chacha20")
+    	the method of encryption(chacha20, aes-*, rc4-md5, salsa20, none) (default "chacha20")
   -mtu int
-        set maximum transmission unit (default 1400)
+    	set maximum transmission unit (default 1400)
   -mulconn int
-        set the number of mulconn
+    	set the number of mulconn
+  -nodummy
+    	disable dummy socket
   -nohttp
-        disable http-obfs
+    	disable http-obfs
   -pass string
-        pre-shared password (default "123")
+    	pre-shared password (default "123")
   -pprof string
-        the listen address of pprof http server
+    	the listen address of pprof http server
   -ps int
-        set fec - parityshard
+    	set fec - parityshard
   -r string
-        set remote server address
+    	set remote server address
   -type string
-        server type(local or server) (default "server")
+    	server type(local or server) (default "server")
   -udp
-        use udp socket
+    	use udp socket
   -usemul
-        use multi-conn mode
+    	use multi-conn mode
 ```
 
 Author
