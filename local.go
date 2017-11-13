@@ -18,6 +18,7 @@ func RunLocalServer(c *config) {
 		DSCP:   0,
 		IgnRST: true,
 		Dummy:  !c.NoDummy,
+		TLS:    c.TLS,
 	}
 	ctx := &utils.UDPServerCtx{
 		Mtu:     c.Mtu,

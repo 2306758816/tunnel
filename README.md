@@ -8,7 +8,7 @@ Synopsis
 
 ```
 #./tunnel -type server -l 127.0.0.1:1080 -r 127.0.0.1:1194 -method chacha20 -pass password -mtu 1200 -ds 20 -ps 10 -expires 300
-#./tunnel -type local  -l 127.0.0.1:1195 -r 127.0.0.1:1080 -method chacha20 -pass password -mtu 1200 -ds 20 -ps 10 -host www.zhihu.com -expires 300  
+#./tunnel -type local  -l 127.0.0.1:1195 -r 127.0.0.1:1080 -method chacha20 -pass password -mtu 1200 -ds 20 -ps 10 -host www.zhihu.com -expires 300 -tls   
 ```
 
 Features 
@@ -16,6 +16,7 @@ Features
 
 * turn udp traffic to tcp traffic  
 * http obfuscating  
+* tls obfuscating  
 * support multiple encryption methods(chacha20/aes*/rc4-md5/salsa20/none)  
 * forward error correction(copy from kcp-go)  
 * aggregate multiple underlying connections to one udp connection  
@@ -85,6 +86,8 @@ Usage of ./tunnel:
     	set fec - parityshard
   -r string
     	set remote server address
+  -tls
+    	enable tls-obfs
   -type string
     	server type(local or server) (default "server")
   -udp

@@ -30,6 +30,7 @@ type config struct {
 	NoDummy     bool   `json:"nodummy"`
 	UseMul      bool   `json:"usemul"`
 	MulConn     int    `json:"mulconn"`
+	TLS         bool   `json:"tls"`
 	Ivlen       int
 }
 

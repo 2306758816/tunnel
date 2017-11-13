@@ -33,6 +33,7 @@ func main() {
 	flag.BoolVar(&cmdconfig.NoDummy, "nodummy", false, "disable dummy socket")
 	flag.BoolVar(&cmdconfig.UseMul, "usemul", false, "use multi-conn mode")
 	flag.IntVar(&cmdconfig.MulConn, "mulconn", 0, "set the number of mulconn")
+	flag.BoolVar(&cmdconfig.TLS, "tls", false, "enable tls-obfs")
 	flag.Parse()
 
 	if len(os.Args) == 2 {
