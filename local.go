@@ -35,10 +35,7 @@ func RunLocalServer(c *config) {
 			log.Println(err)
 			return
 		}
-		rconn = &Conn{
-			Conn:   &utils.CopyConn{Conn: rconn},
-			config: c,
-		}
+		rconn = newConn(rconn, c)
 		if c.DataShard != 0 && c.ParityShard != 0 {
 			rconn = utils.NewFecConn(rconn, c.DataShard, c.ParityShard)
 		}

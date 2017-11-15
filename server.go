@@ -24,10 +24,7 @@ func RunRemoteServer(c *config) {
 		log.Fatal(err)
 	}
 	create := func(sconn *utils.SubConn) (conn net.Conn, rconn net.Conn, err error) {
-		conn = &Conn{
-			Conn:   sconn,
-			config: c,
-		}
+		conn = newConn(sconn, c)
 		if c.DataShard != 0 && c.ParityShard != 0 {
 			conn = utils.NewFecConn(conn, c.DataShard, c.ParityShard)
 		}
