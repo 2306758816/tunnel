@@ -34,6 +34,7 @@ func main() {
 	flag.BoolVar(&cmdconfig.UseMul, "usemul", false, "use multi-conn mode")
 	flag.IntVar(&cmdconfig.MulConn, "mulconn", 0, "set the number of mulconn")
 	flag.BoolVar(&cmdconfig.TLS, "tls", false, "enable tls-obfs")
+	flag.BoolVar(&cmdconfig.Slice, "slice", false, "enable slice mode, large udp packets will be cut into small slices")
 	flag.Parse()
 
 	if len(os.Args) == 2 {

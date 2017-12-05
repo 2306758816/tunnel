@@ -20,6 +20,10 @@ func RunLocalServer(c *config) {
 		Dummy:  !c.NoDummy,
 		TLS:    c.TLS,
 	}
+	smtu := c.Mtu
+	if c.Slice {
+		c.Mtu = 65535
+	}
 	ctx := &utils.UDPServerCtx{
 		Mtu:     c.Mtu,
 		Expires: c.Expires,
@@ -34,6 +38,9 @@ func RunLocalServer(c *config) {
 		if err != nil {
 			log.Println(err)
 			return
+		}
+		if c.Slice {
+			rconn = utils.NewSliceConn(rconn, smtu)
 		}
 		rconn = newConn(rconn, c)
 		if c.DataShard != 0 && c.ParityShard != 0 {

@@ -32,6 +32,7 @@ type config struct {
 	MulConn     int    `json:"mulconn"`
 	TLS         bool   `json:"tls"`
 	Auth        bool   `json:"auth"`
+	Slice       bool   `json:"slice"`
 	Ivlen       int
 }
 

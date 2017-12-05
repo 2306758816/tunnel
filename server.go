@@ -19,12 +19,20 @@ func RunRemoteServer(c *config) {
 		Mixed:  true,
 		Dummy:  !c.NoDummy,
 	}
+	smtu := c.Mtu
+	if c.Slice {
+		c.Mtu = 65535
+	}
 	conn, err := kcpraw.ListenRAW(c.Localaddr, c.Password, c.UseMul, c.UDP, &raw)
 	if err != nil {
 		log.Fatal(err)
 	}
 	create := func(sconn *utils.SubConn) (conn net.Conn, rconn net.Conn, err error) {
-		conn = newConn(sconn, c)
+		conn = sconn
+		if c.Slice {
+			conn = utils.NewSliceConn(sconn, smtu)
+		}
+		conn = newConn(conn, c)
 		if c.DataShard != 0 && c.ParityShard != 0 {
 			conn = utils.NewFecConn(conn, c.DataShard, c.ParityShard)
 		}
